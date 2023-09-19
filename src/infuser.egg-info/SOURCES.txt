@@ -1,0 +1,9 @@
+LICENSE.txt
+MANIFEST.in
+README.md
+setup.py
+src/infuser.egg-info/PKG-INFO
+src/infuser.egg-info/SOURCES.txt
+src/infuser.egg-info/dependency_links.txt
+src/infuser.egg-info/requires.txt
+src/infuser.egg-info/top_level.txt

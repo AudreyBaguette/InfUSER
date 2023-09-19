@@ -1,0 +1,36 @@
+Metadata-Version: 2.1
+Name: infuser
+Version: 1.0.0
+Summary: This library proposes a set of tools to infer Hi-C maps from a differentiation tree.
+Home-page: https://github.com/AudreyBaguette/InfUSER
+Author: Audrey Baguette
+Author-email: audrey.baguette@gmail.com
+Project-URL: Bug Reports, https://github.com/AudreyBaguette/InfUSER/issues
+Project-URL: Source, https://github.com/AudreyBaguette/InfUSER/
+Keywords: Hi-C,inference,bioinformatics
+Classifier: Development Status :: 3 - Alpha
+Classifier: Intended Audience :: Science/Research
+Classifier: Topic :: Scientific/Engineering :: Bio-Informatics
+Classifier: License :: OSI Approved :: Common Public License
+Classifier: Programming Language :: Python :: 3
+Requires-Python: >=3.7, <4
+Description-Content-Type: text/markdown
+License-File: LICENSE.txt
+Requires-Dist: treelib
+Requires-Dist: warnings
+Requires-Dist: os
+Requires-Dist: numpy
+Requires-Dist: time
+Requires-Dist: joblib
+Requires-Dist: cooler
+Requires-Dist: copy
+Requires-Dist: cooltools
+Requires-Dist: math
+Requires-Dist: pandas
+
+# InfUSER
+## About
+`InfUSER` proposes a set of tools to infer Hi-C maps from a differentiation tree and deconvolute vulk Hi-C.
+
+## Quick Start
+[TODO]

@@ -132,7 +132,7 @@ def find_min_change(scores_array, target_value, n_values):
     return(new_scores[min_index], int(min_index))
 
 
-def modified_sankoff_single(tree_path, sample_file, output_dir, chrom_sizes, chromlist,\
+def single_tree(tree_path, sample_file, output_dir, chrom_sizes, chromlist,\
     res = 10000, subset = None, dist = 0, n_values = 9, min = -4, max = 4,\
     column = 4, transform = ["Z-score"], balance = True, n_jobs = 4):
     '''Find internal nodes of a phylogenic tree
@@ -168,7 +168,7 @@ def modified_sankoff_single(tree_path, sample_file, output_dir, chrom_sizes, chr
         the maximal Z-score value to consider (default 4)
     column : int
         optional, the column conting the score to consider. The first column is column 1. Ignored if the input files are .mcool files (default 4)
-    transformation : list of string
+    transform : list of string
         the transformation(s) to apply to the matrix. "OE". "log1p" and "Z-score" are supported. (default Z-score)
     balance : boolean
         should the balanced weights be used (default True)

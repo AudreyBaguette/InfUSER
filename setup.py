@@ -122,7 +122,7 @@ setup(
     #
     # For an analysis of "install_requires" vs pip's requirements files see:
     # https://packaging.python.org/discussions/install-requires-vs-requirements/
-    install_requires=["treelib", "warnings", "os", "numpy", "time", "joblib", "cooler", "copy", "cooltools", "math", 'pandas'],  # Optional
+    install_requires=["treelib", "numpy", "joblib", "cooler", "cooltools", 'pandas', "scikit-image"],  # Optional
     # Entry points. The following would provide a command called `sample` which
     # executes the function `main` from this package when invoked:
     # entry_points={  # Optional

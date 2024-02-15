@@ -1,5 +1,5 @@
 from treelib import Tree, Node
-from Pixel import Pixel
+from .Pixel import Pixel
 import os
 
 def init_tree(file_path, n_values = 9):

@@ -200,7 +200,7 @@ def HiC_matrix_to_vector_chrom(sample, res, chrom, subset = None, balance = True
         A, means, vars = z_transform(A)
 
     
-    if not subset is None:
+    if (not subset is None) and (subset != ""):
         regions = pd.read_csv(subset, sep = "\t")
         regions_chrom = regions[regions.seqnames == chrom]
         if len(regions_chrom) == 0:
@@ -281,7 +281,7 @@ def HiC_matrix_to_vector(sample, res, subset = None, balance = True, transformat
     full_vector = np.array([])
     all_means = {}
     all_vars = {}
-    if not subset is None:
+    if (not subset is None) and (subset != ""):
         regions = pd.read_csv(subset, sep = "\t")
         if len(regions) == 0:
             raise EOFError('The subset file is empty.')
@@ -380,7 +380,7 @@ def vector_to_matrix_chrom(vector, res, chrom, subset = None, dist = 0, chrom_si
     '''
     sizes = pd.read_csv(chrom_sizes, sep = "\t", header = None)
     nbins = math.ceil(sizes[1][sizes[0] == chrom] / res)
-    if not subset is None:
+    if (not subset is None) and (subset != ""):
         regions = pd.read_csv(subset, sep = "\t")
         regions_chrom = regions[regions.seqnames == chrom]
         if len(regions_chrom) == 0:
@@ -456,7 +456,7 @@ def vector_to_matrix(vector, res, subset = None, dist = 0, chrom_sizes = "hg38.c
     sizes = pd.read_csv(chrom_sizes, sep = "\t", header = None)
     matrices_dict = {}
     
-    if not subset is None:
+    if (not subset is None) and (subset != ""):
         regions = pd.read_csv(subset, sep = "\t")
         if len(regions) == 0:
             raise EOFError('The subset file is empty.')

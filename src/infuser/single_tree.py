@@ -1,8 +1,8 @@
 from treelib import Tree, Node
-from Pixel import Pixel
-from init_tree import init_tree
-from conversions import *
-from utils import *
+from .Pixel import Pixel
+from .init_tree import init_tree
+from .conversions import *
+from .utils import *
 import warnings
 import os
 import numpy as np
@@ -37,7 +37,7 @@ def prepare_bins(chrom_sizes, res, subset = None, chromlist = []):
     id = 0
     sizes = pd.read_csv(chrom_sizes, sep = "\t", header = None)
     bins = None
-    if subset is not None:
+    if (subset is not None) and (subset != ""):
         subset_info = pd.read_csv(chrom_sizes, sep = "\t", header = None)
         chromosomes_to_consider = subset_info[0]
     elif len(chromlist) > 0:
@@ -173,7 +173,7 @@ def single_tree(tree_path, sample_file, output_dir, chrom_sizes, chromlist,\
     balance : boolean
         should the balanced weights be used (default True)
     n_jobs : int
-        for paralleliation of pixel computation, how many jobs should be run in parallel
+        for paralleliation of pixel computation, how many jobs should be run in parallel (default 4)
     Raises
     ------
     Exception if one sample is of type .mcool and not the others

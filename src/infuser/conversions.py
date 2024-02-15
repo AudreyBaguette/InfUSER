@@ -1,5 +1,5 @@
 import numpy as np
-from utils import kth_diag_indices
+from .utils import kth_diag_indices
 import copy
 
 def to_indices(vector, step, min_score, max_score):

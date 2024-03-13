@@ -61,7 +61,7 @@ def prepare_bins(chrom_sizes, res, subset = None, chromlist = []):
     return bins, first_id_dict
 
 
-def recurse_through_nodes(tree, dict, current_node, k, index):
+def recurse_through_nodes(tree, values, names, current_node, k):
     '''Find the origins of a specific value for a node
     
     This function takes a node current_node and a value k and appends the origins of the nodes' children 
@@ -71,14 +71,14 @@ def recurse_through_nodes(tree, dict, current_node, k, index):
     ----------
     tree : Tree
         the object containing the tree topology
-    dict : Dictionary
-        the object storing the data for each node in the tree
+    values : numpy array
+        array storing the data for each node in the tree
+    names : numpy array
+        array storing the names of each element in the values array
     currentNode : string
         the name of the node whose children should be fetched
     k : int
         the value to consider
-    index : int
-        the place where to put the value in the dictionary's contents
     
     '''
     # Find the children's values resulting in value k in the current_node
@@ -95,10 +95,11 @@ def recurse_through_nodes(tree, dict, current_node, k, index):
         # 1- Get carrient stored vector
         child_name = children[child_index].tag
         # 2- Update the new value to vector and save it
-        dict[child_name][index] = origins[child_index]
+        index = np.where(names == child_name)[0][0]
+        values[index] = origins[child_index]
         
         # Recurse on children
-        recurse_through_nodes(tree, dict, children[child_index].tag, origins[child_index], index)
+        recurse_through_nodes(tree, values, names, children[child_index].tag, origins[child_index])
 
 
 def find_min_change(scores_array, target_value, n_values):
@@ -181,7 +182,7 @@ def single_tree(tree_path, sample_file, output_dir, chrom_sizes, chromlist,\
     '''
     start_time = time.time()
     
-    # 1- Initiate the tree and create the output directory
+    # 1- Initialize the tree and create the output directory
     if not os.path.isdir(output_dir):
         os.makedirs(output_dir, exist_ok=True)
         log = open(output_dir+"/log.txt", "w")
@@ -203,8 +204,8 @@ def single_tree(tree_path, sample_file, output_dir, chrom_sizes, chromlist,\
     step = (max - min) / (n_values - 1) # Set used to convert Z-scores to indices
     num_HiC = 0 # Count the number of Hi-C samples to check they are all Hi-C or all other
     num_other = 0
+    f = open(sample_file, "r")
     try:
-        f = open(sample_file, "r")
         line = f.readline()
         
         while line != '':
@@ -234,8 +235,6 @@ def single_tree(tree_path, sample_file, output_dir, chrom_sizes, chromlist,\
                 means_dict[names[0]] = means
                 vars_dict[names[0]] = vars
                 vector_dict[names[0]] = v
-                # TODO
-                #vector_dict[names[0]] = dict(enumerate(map(float, v)))
             line = f.readline()
     finally:
         f.close()
@@ -260,17 +259,14 @@ def single_tree(tree_path, sample_file, output_dir, chrom_sizes, chromlist,\
             vector_dict[node.tag] = np.zeros(n_pixels)
             
     # 3- Iterate across pixels and save the data sequentially
-    #parsimony_scores = np.zeros(n_pixels)
-    parsimony_scores = dict() #TODO
     percent = np.round(n_pixels/100)
 
     ##### This is the thing to convert to a function
-    def process_pixel(pixel, new_tree, vector_dict, n_values, parsimony_scores):
-        #new_tree = Tree(tree, deep = True)
+    def process_pixel(array, row_names, new_tree, n_values):
         # 3.1- Initialize the leaves
         for leaf in new_tree.leaves():
-            x = vector_dict[leaf.tag]
-            leaf.data.set_score(int(x[pixel]),0)
+            index = np.where(row_names == leaf.tag)[0][0]
+            leaf.data.set_score(int(array[index]),0)
         
         # 3.2- Bottom-up
         # Iterate throught the non-leaves nodes
@@ -291,17 +287,23 @@ def single_tree(tree_path, sample_file, output_dir, chrom_sizes, chromlist,\
         # 3.3- Traceback
         # Start at the root, find the minimal value and store it
         min_value, min_score = new_tree.get_node(new_tree.root).data.get_min_value()
-        vector_dict[tree.root][pixel] = min_value #### TODO
-        parsimony_scores[pixel] = min_score #### TODO
+        index = np.where(row_names == leaf.tag)[0][0]
+        array[index] = min_value
+        parsimony_score = min_score
         
         # Recurse through children until leaves are reached
-        recurse_through_nodes(new_tree, vector_dict, new_tree.root, min_value, pixel) #### TODO
+        recurse_through_nodes(new_tree, array, row_names, new_tree.root, min_value)
         
         # 3.4- Re-initialize the leaves for the next iteration
         #for leaf in tree.leaves():
         #    leaf.data.reset_scores()
+        return(np.concatenate((array, [parsimony_score])))
     ########
-    a = Parallel(n_jobs=n_jobs, require='sharedmem')(delayed(process_pixel)(pixel, Tree(tree, deep = True), vector_dict, n_values, parsimony_scores) for pixel in range(n_pixels))
+    # Convert the dictionary in an array fo easy parallelization
+    matrix = np.array(list(vector_dict.values()))
+    row_names = np.array(list(vector_dict.keys()))
+    results = Parallel(n_jobs=n_jobs)(delayed(process_pixel)(pixel, row_names, Tree(tree, deep = True), n_values) for pixel in matrix.transpose())
+    results = np.array(results).transpose()
     ########
 
     body_done = time.time()
@@ -311,8 +313,7 @@ def single_tree(tree_path, sample_file, output_dir, chrom_sizes, chromlist,\
 
     # 3.5 Stats about the parsimony score
     log = open(output_dir+"/log.txt", "a")
-    #TODO
-    parsimony_scores = np.array(list(parsimony_scores.values()))
+    parsimony_scores = results[-1]
     log.write("Total parsimony score: %s \n" % (parsimony_scores.sum()))
     log.write("Mean parsimony score: %s \n" % (parsimony_scores.mean()))
     log.write("Standard deviation parsimony score: %s \n" % (parsimony_scores.std()))
@@ -330,13 +331,13 @@ def single_tree(tree_path, sample_file, output_dir, chrom_sizes, chromlist,\
         os.remove(output_dir + "/tree_structure.txt")
     tree.save2file(output_dir + "/tree_structure.txt")
     
-    #matrices_dict={} #Dictionary to save Hi-C matrices to compute the edges
     # Save the data in matrix format
     if not os.path.isdir(output_dir+"/leaves"): os.mkdir(output_dir+"/leaves")
     if not os.path.isdir(output_dir+"/internal_nodes"): os.mkdir(output_dir+"/internal_nodes")
     for node in vector_dict.keys():
         # Re-convert to Z-score
-        vector_dict[node] = to_Zscore(vector_dict[node], step, min) #TODO
+        row_num = np.where(row_names == node)[0][0]
+        vector_dict[node] = to_Zscore(results[row_num], step, min)
         log = open(output_dir+"/log.txt", "a")
         log.write("    Saving " + node + "...\n")
         log.close()

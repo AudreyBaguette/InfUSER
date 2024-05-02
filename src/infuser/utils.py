@@ -296,7 +296,6 @@ def HiC_matrix_to_vector(sample, res, subset = None, balance = True, transformat
         all_chroms = clr.chromnames
     
     for chrom in all_chroms:
-        print(chrom)
         vector, means, vars = HiC_matrix_to_vector_chrom(sample, res, chrom, subset, balance, transformation, dist)
         full_vector = np.concatenate((full_vector, vector))
         all_means[chrom] = means
@@ -403,8 +402,6 @@ def vector_to_matrix_chrom(vector, res, chrom, subset = None, dist = 0, chrom_si
     elif dist > 0:
         D = np.ceil(dist/res) - 1
         length = int((nbins*(nbins+1)/2) - ((nbins-D)*((nbins-D)+1)/2))
-        print(length)
-        print(len(vector))
         vector_subset = vector[range(0, length)]
         vector = np.delete(vector, range(0, length))
         A = diag_to_matrix(vector_subset, D, nbins)
@@ -468,7 +465,6 @@ def vector_to_matrix(vector, res, subset = None, dist = 0, chrom_sizes = "hg38.c
         all_chroms = np.array(sizes.iloc[to_keep,0])
     
     for chrom in all_chroms:
-        print(chrom)
         A = vector_to_matrix_chrom(vector, res, chrom, subset, dist, chrom_sizes)
         matrices_dict[chrom] = A
             

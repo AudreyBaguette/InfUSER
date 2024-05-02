@@ -55,5 +55,6 @@ min, max, column, transform, balance, njobs):
     CHROMLIST    the names of the chromosomes to consider. This list is ignored if subset is not null
  
     '''
+    chromlist = chromlist.split(',')
     single_tree(treepath, samplefile, outdir, chromsizes, chromlist, resolution, subset, dist, nvalues, \
         min, max, column, transform, balance, njobs)

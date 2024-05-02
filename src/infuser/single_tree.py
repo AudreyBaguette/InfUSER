@@ -294,9 +294,6 @@ def single_tree(tree_path, sample_file, output_dir, chrom_sizes, chromlist,\
         # Recurse through children until leaves are reached
         recurse_through_nodes(new_tree, array, row_names, new_tree.root, min_value)
         
-        # 3.4- Re-initialize the leaves for the next iteration
-        #for leaf in tree.leaves():
-        #    leaf.data.reset_scores()
         return(np.concatenate((array, [parsimony_score])))
     ########
     # Convert the dictionary in an array fo easy parallelization
@@ -379,7 +376,6 @@ def single_tree(tree_path, sample_file, output_dir, chrom_sizes, chromlist,\
                     zscores_df = z_df
                 else :
                     zscores_df = pd.concat([zscores_df, z_df])
-            #matrices_dict[node] = mat_dict
             # Save pseudo counts
             pixel_df['count'] = pixel_df['count']*1000 #Values < 1 are converted to 0, so mutliply them to have int
             cooler.create_cooler(path+node+".cool", bins_df, pixel_df, ordered=True)
@@ -413,10 +409,8 @@ def single_tree(tree_path, sample_file, output_dir, chrom_sizes, chromlist,\
                     pixel_df = None
                     vector_diff = vector_dict[child.tag] - vector_dict[new_node.tag]
                     mat_dict = vector_to_matrix(vector_diff, res, subset, dist, chrom_sizes, chromlist)
-                    #mat_dict = vector_to_matrix(vector_dict[node], res, subset, dist, chrom_sizes, chromlist)
                     for chrom in mat_dict.keys():
                         diff = mat_dict[chrom]
-                        #diff = matrices_dict[child.tag][chrom] - matrices_dict[new_node.tag][chrom]
                         names = range(id_dict[chrom], id_dict[chrom]+len(diff))
                         df = pd.DataFrame(diff,columns=names)
                         df['bin1_id'] = names

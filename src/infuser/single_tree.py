@@ -222,8 +222,8 @@ def single_tree(tree_path, sample_file, output_dir, chrom_sizes, chromlist,\
                 log.write("    Reading " + names[0] + "...\n")
                 log.close()
                 
-                sample_is_mcool = ".mcool" in names[1]
-                if sample_is_mcool:
+                sample_is_cool = "cool" in names[1]
+                if sample_is_cool:
                     num_HiC += 1
                     v, means, vars = HiC_matrix_to_vector(names[1], res, subset = subset, chromlist = chromlist, balance = balance, transformation = transform, dist = dist)
                 else:
@@ -287,7 +287,7 @@ def single_tree(tree_path, sample_file, output_dir, chrom_sizes, chromlist,\
         # 3.3- Traceback
         # Start at the root, find the minimal value and store it
         min_value, min_score = new_tree.get_node(new_tree.root).data.get_min_value()
-        index = np.where(row_names == leaf.tag)[0][0]
+        index = np.where(row_names == new_tree.get_node(new_tree.root).tag)[0][0]
         array[index] = min_value
         parsimony_score = min_score
         
@@ -377,11 +377,9 @@ def single_tree(tree_path, sample_file, output_dir, chrom_sizes, chromlist,\
                 else :
                     zscores_df = pd.concat([zscores_df, z_df])
             # Save pseudo counts
-            pixel_df['count'] = pixel_df['count']*1000 #Values < 1 are converted to 0, so mutliply them to have int
-            cooler.create_cooler(path+node+".cool", bins_df, pixel_df, ordered=True)
+            cooler.create_cooler(path+node+".cool", bins_df, pixel_df, ordered=True, dtypes = {"count": "float"})
             # Save z-scores
-            zscores_df['count'] = zscores_df['count']*100 #Values < 1 are converted to 0, so mutliply them to have int
-            cooler.create_cooler(path+node+".zscores.cool", bins_df, zscores_df, ordered=True)
+            cooler.create_cooler(path+node+".zscores.cool", bins_df, zscores_df, ordered=True, dtypes = {"count": "float"})
         else :
             data = to_scores(vector_dict[node], samples_to_consider, transform, means_dict, vars_dict)
             matrices_dict[node] = vector_dict[node]
@@ -422,8 +420,7 @@ def single_tree(tree_path, sample_file, output_dir, chrom_sizes, chromlist,\
                             pixel_df = df
                         else :
                             pixel_df = pd.concat([pixel_df, df])
-                    pixel_df['count'] = pixel_df['count']*100
-                    cooler.create_cooler(path+pair+".cool", bins_df, pixel_df, ordered=True)
+                    cooler.create_cooler(path+pair+".cool", bins_df, pixel_df, ordered=True, dtypes = {"count": "float"})
                 else:
                     diff = matrices_dict[child.tag] - matrices_dict[new_node.tag]
                     np.savetxt(path+pair+".tsv", diff, delimiter="\t")

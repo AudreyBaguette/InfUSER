@@ -407,7 +407,7 @@ def vector_to_matrix_chrom(vector, res, chrom, subset = None, dist = 0, chrom_si
         A = diag_to_matrix(vector_subset, D, nbins)
         return A
     else :
-        length = (nbins*(nbins+1))/2
+        length = (nbins*(nbins+1))//2
         vector_subset = vector[range(0, length)]
         vector = np.delete(vector, range(0, length))
         array = np.full((nbins, nbins), np.nan)

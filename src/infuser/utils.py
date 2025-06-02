@@ -392,7 +392,7 @@ def vector_to_matrix_chrom(vector, res, chrom, subset = None, dist = 0, chrom_si
             start_i = math.floor(start/res)
             end_i = math.floor(end/res)
             diff = end_i - start_i
-            length = int((diff*(diff+1))/2)
+            length = (diff*(diff+1))//2
             vector_subset = vector[range(0, length)]
             array = np.full((diff, diff), np.nan)
             array[np.triu_indices_from(array)] = vector_subset
@@ -401,7 +401,7 @@ def vector_to_matrix_chrom(vector, res, chrom, subset = None, dist = 0, chrom_si
         return A
     elif dist > 0:
         D = np.ceil(dist/res) - 1
-        length = int((nbins*(nbins+1)/2) - ((nbins-D)*((nbins-D)+1)/2))
+        length = (nbins*(nbins+1)//2) - ((nbins-D)*((nbins-D)+1)//2)
         vector_subset = vector[range(0, length)]
         vector = np.delete(vector, range(0, length))
         A = diag_to_matrix(vector_subset, D, nbins)

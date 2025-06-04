@@ -227,8 +227,6 @@ def HiC_matrix_to_vector_chrom(sample, res, chrom, subset = None, balance = True
     else :
         vector = np.concatenate((vector, A[np.triu_indices_from(A)]))
         expected_length = (len(A)*(len(A)+1))/2
-        #vector = np.concatenate((vector, A.flatten()))
-        #expected_length = len(A) * len(A)
     
     if len(vector) == 0:
         raise Exception('The resulting vector is empty.')
@@ -401,17 +399,11 @@ def vector_to_matrix_chrom(vector, res, chrom, subset = None, dist = 0, chrom_si
         return A
     elif dist > 0:
         D = np.ceil(dist/res) - 1
-        length = (nbins*(nbins+1)//2) - ((nbins-D)*((nbins-D)+1)//2)
-        vector_subset = vector[range(0, length)]
-        vector = np.delete(vector, range(0, length))
-        A = diag_to_matrix(vector_subset, D, nbins)
+        A = diag_to_matrix(vector, D, nbins)
         return A
     else :
-        length = (nbins*(nbins+1))//2
-        vector_subset = vector[range(0, length)]
-        vector = np.delete(vector, range(0, length))
         array = np.full((nbins, nbins), np.nan)
-        array[np.triu_indices_from(array)] = vector_subset
+        array[np.triu_indices_from(array)] = vector
         return array
 
 

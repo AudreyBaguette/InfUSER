@@ -1,6 +1,6 @@
 from treelib import Tree, Node
 from .Pixel import Pixel
-from .init_tree import init_tree
+from .init_tree import *
 from .conversions import *
 from .utils import *
 import warnings
@@ -61,80 +61,9 @@ def prepare_bins(chrom_sizes, res, subset = None, chromlist = []):
     return bins, first_id_dict
 
 
-def recurse_through_nodes(tree, values, names, current_node, k):
-    '''Find the origins of a specific value for a node
-    
-    This function takes a node current_node and a value k and appends the origins of the nodes' children 
-    to the corresponding vector of values
-    
-    Parameters
-    ----------
-    tree : Tree
-        the object containing the tree topology
-    values : numpy array
-        array storing the data for each node in the tree
-    names : numpy array
-        array storing the names of each element in the values array
-    currentNode : string
-        the name of the node whose children should be fetched
-    k : int
-        the value to consider
-    
-    '''
-    # Find the children's values resulting in value k in the current_node
-    children = tree.children(current_node)
-    # Stop condition: the node doesn't have children
-    if len(children) == 0:
-        return
-    
-    origins = tree.get_node(current_node).data.get_min_origins(k)
-    
-    for child_index in range(0, len(children)):
-        # Save the origins in the dict
-        # assuming origins and children are in the same order...
-        # 1- Get carrient stored vector
-        child_name = children[child_index].tag
-        # 2- Update the new value to vector and save it
-        index = np.where(names == child_name)[0][0]
-        values[index] = origins[child_index]
-        
-        # Recurse on children
-        recurse_through_nodes(tree, values, names, children[child_index].tag, origins[child_index])
-
-
-def find_min_change(scores_array, target_value, n_values):
-    '''Find the minimal score
-    
-    This function takes a scores array and finds the new minimal score and the value it comes from
-    
-    Parameters
-    ----------
-    scores_array : numpy array
-        a n_values x 1 array with the old scores
-    target_value : int
-        the value to which the difference should be computed
-    n_values : int
-        the number of possible values
-    
-    Returns
-    -------
-    a tuple containing a float with the new score and an int that is its origin value
-    
-    '''
-    new_scores = np.full((n_values, 1), np.inf)
-    for origin_value in range(0, n_values):
-        # Compute new score (old score + difference between values) and store it
-        old_score = scores_array[origin_value][0]
-        change = abs(target_value - origin_value)
-        new_scores[origin_value] = old_score + change
-        
-    # Find the min score and return it and its index
-    min_index = np.argmin(new_scores)
-    return(new_scores[min_index], int(min_index))
-
 
 def single_tree(tree_path, sample_file, output_dir, chrom_sizes, chromlist,\
-    res = 10000, subset = None, dist = 0, n_values = 9, min = -4, max = 4,\
+    res = 10000, subset = None, dist = 0,\
     column = 4, transform = ["Z-score"], balance = True, n_jobs = 4):
     '''Find internal nodes of a phylogenic tree
     
@@ -161,12 +90,6 @@ def single_tree(tree_path, sample_file, output_dir, chrom_sizes, chromlist,\
     dist : int
         optional, the distance to consider. All interactions beyond that distance will be ignored. If set to 0, all interactions 
         are kept. (default 0)
-    n_values : int
-        the number of values that can be stored in the nodes (default 9)
-    min : float
-        the minimal Z-score value to consider (default -4)
-    max : float
-        the maximal Z-score value to consider (default 4)
     column : int
         optional, the column conting the score to consider. The first column is column 1. Ignored if the input files are .mcool files (default 4)
     transform : list of string
@@ -195,13 +118,12 @@ def single_tree(tree_path, sample_file, output_dir, chrom_sizes, chromlist,\
         log.close()
         warnings.warn("The output directory " + output_dir +  " already exists. Overwriting...")
     
-    tree = init_tree(tree_path, n_values)
+    tree = init_tree(tree_path)
     
     # 2- Read the sample file and store the data into a dictionary. The keys should match the leaves' names in the tree
     vector_dict = {} # Dictionary containing the Hi-C data, stored as vectors
     means_dict = {} # Dictionary containing the means per diagonal
     vars_dict = {} # Dictionary containing the variances per diagonal
-    step = (max - min) / (n_values - 1) # Set used to convert Z-scores to indices
     num_HiC = 0 # Count the number of Hi-C samples to check they are all Hi-C or all other
     num_other = 0
     f = open(sample_file, "r")
@@ -231,7 +153,6 @@ def single_tree(tree_path, sample_file, output_dir, chrom_sizes, chromlist,\
                     v, means, vars = get_1D_data(names[1], transformation = transform, col = column)
                 
                 # Transform the Z-score vector to indices vector
-                v = to_indices(v, step, min, max)
                 means_dict[names[0]] = means
                 vars_dict[names[0]] = vars
                 vector_dict[names[0]] = v
@@ -261,45 +182,10 @@ def single_tree(tree_path, sample_file, output_dir, chrom_sizes, chromlist,\
     # 3- Iterate across pixels and save the data sequentially
     percent = np.round(n_pixels/100)
 
-    ##### This is the thing to convert to a function
-    def process_pixel(array, row_names, new_tree, n_values):
-        # 3.1- Initialize the leaves
-        for leaf in new_tree.leaves():
-            index = np.where(row_names == leaf.tag)[0][0]
-            leaf.data.set_score(int(array[index]),0)
-        
-        # 3.2- Bottom-up
-        # Iterate throught the non-leaves nodes
-        nodes = new_tree.all_nodes()
-        nodes.reverse()
-        for node in nodes:
-            if not node.is_leaf():
-                # Iterate through the possible values
-                for value in range(0, n_values):
-                    new_score = 0
-                    origins = []
-                    for child in new_tree.children(node.tag):
-                        result = find_min_change(child.data.scores_matrix, value, n_values)
-                        new_score += result[0]
-                        origins = origins + [result[1]]
-                    node.data.set_score_and_origins(value, new_score, origins)
-        
-        # 3.3- Traceback
-        # Start at the root, find the minimal value and store it
-        min_value, min_score = new_tree.get_node(new_tree.root).data.get_min_value()
-        index = np.where(row_names == new_tree.get_node(new_tree.root).tag)[0][0]
-        array[index] = min_value
-        parsimony_score = min_score
-        
-        # Recurse through children until leaves are reached
-        recurse_through_nodes(new_tree, array, row_names, new_tree.root, min_value)
-        
-        return(np.concatenate((array, [parsimony_score])))
-    ########
     # Convert the dictionary in an array fo easy parallelization
     matrix = np.array(list(vector_dict.values()))
     row_names = np.array(list(vector_dict.keys()))
-    results = Parallel(n_jobs=n_jobs)(delayed(process_pixel)(pixel, row_names, Tree(tree, deep = True), n_values) for pixel in matrix.transpose())
+    results = Parallel(n_jobs=n_jobs)(delayed(process_pixel)(pixel, row_names, Tree(tree, deep = True)) for pixel in matrix.transpose())
     results = np.array(results).transpose()
     ########
 
@@ -334,7 +220,7 @@ def single_tree(tree_path, sample_file, output_dir, chrom_sizes, chromlist,\
     for node in vector_dict.keys():
         # Re-convert to Z-score
         row_num = np.where(row_names == node)[0][0]
-        vector_dict[node] = to_Zscore(results[row_num], step, min)
+        vector_dict[node] = results[row_num]
         log = open(output_dir+"/log.txt", "a")
         log.write("    Saving " + node + "...\n")
         log.close()
@@ -378,8 +264,6 @@ def single_tree(tree_path, sample_file, output_dir, chrom_sizes, chromlist,\
                     zscores_df = pd.concat([zscores_df, z_df])
             # Save pseudo counts
             cooler.create_cooler(path+node+".cool", bins_df, pixel_df, ordered=True, dtypes = {"count": "float"})
-            # Save z-scores
-            cooler.create_cooler(path+node+".zscores.cool", bins_df, zscores_df, ordered=True, dtypes = {"count": "float"})
         else :
             data = to_scores(vector_dict[node], samples_to_consider, transform, means_dict, vars_dict)
             matrices_dict[node] = vector_dict[node]

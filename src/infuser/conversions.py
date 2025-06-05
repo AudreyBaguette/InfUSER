@@ -2,63 +2,6 @@ import numpy as np
 from .utils import kth_diag_indices
 import copy
 
-def to_indices(vector, step, min_score, max_score):
-    '''Convert a Z-scores vector to an indices vector
-    
-    This function takes a vector containing Z-scores and transforms it to indices.
-    
-    Parameters
-    ----------
-    vector : numpy array
-        the data to convert
-    step : float
-        the difference in Z-score between two consecutive indices
-    min_score : float
-        the minimal value to consider
-    max_score : float
-        the maximal value to consider
-    
-    Returns
-    -------
-    a numpy array containing the converted vector
-
-    '''
-    indices = np.zeros(len(vector))
-    max_index = (max_score - min_score) / step
-    for i in range(0, len(vector)):
-        # Convert the scores to indices
-        index = (vector[i] - min_score) / step
-        # Put everything below 0 to 0 and everything above the max to the max
-        if index < 0:
-            index = 0
-        elif index > max_index:
-            index = max_index
-        elif np.isnan(index):
-            index = 0
-        indices[i] = int(index)
-    return np.array(indices)
-
-def to_Zscore(vector, step, min_score):
-    '''Convert an indices vector to a Z-scores vector
-    
-    This function takes a vector containing indices and transforms it to Z-scores.
-    
-    Parameters
-    ----------
-    vector : numpy array
-        the data to convert
-    step : float
-        the difference in Z-score between two consecutive indices
-    min_score : float
-        the minimal value to consider
-    
-    Returns
-    -------
-    a numpy array containing the converted vector
-
-    '''
-    new_vec = (vector * step) + min_score
-    return new_vec
 
 def to_HiC_scores(input_matrix, chrom, samples, transformation, means_dict, vars_dict):
     '''Convert a Z-scores matrix to an Hi-C matrix

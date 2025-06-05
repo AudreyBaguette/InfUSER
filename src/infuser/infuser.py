@@ -21,7 +21,7 @@ def cli():
 
 @cli.command()
 def info():
-    print("InfUSER verison 1.0.0 (https://github.com/AudreyBaguette/InfUSER)")
+    print("InfUSER verison 1.1.0 (https://github.com/AudreyBaguette/InfUSER)")
 
 @cli.command()
 @click.argument('treepath', nargs=1)
@@ -32,9 +32,6 @@ def info():
 @click.option('-r', '--resolution', type=int, help='the resolution to consider', default=10000)
 @click.option('-s', '--subset', type=str, help='the path to the file containing the regions to subset, if any', default='')
 @click.option('-d', '--dist', type=int, help='the distance to consider. All interactions beyond that distance will be ignored. If set to 0, all interactions are kept', default=0)
-@click.option('-nv', '--nvalues', type=int, help='the number of values that can be stored in the nodes', default=9)
-@click.option('--min', type=float, help='the minimal Z-score value to consider', default=-4)
-@click.option('--max', type=float, help='the maximal Z-score value to consider', default=4)
 @click.option('-c', '--column', type=int, help='the column conting the score to consider. The first column is column 1. Ignored if the input files are .mcool files', default=4)
 @click.option('-t', '--transform', type=list, help='the transformation(s) to apply to the matrix. "OE". "log1p" and "Z-score" are supported.', default=['Z-score'])
 @click.option('-b', '--balance', type=bool, help='should the balanced weights be used', default=True)
@@ -56,5 +53,5 @@ min, max, column, transform, balance, njobs):
  
     '''
     chromlist = chromlist.split(',')
-    single_tree(treepath, samplefile, outdir, chromsizes, chromlist, resolution, subset, dist, nvalues, \
-        min, max, column, transform, balance, njobs)
+    single_tree(treepath, samplefile, outdir, chromsizes, chromlist, resolution, subset, dist, \
+        column, transform, balance, njobs)

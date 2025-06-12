@@ -84,7 +84,7 @@ def single_tree(tree_path, sample_file, output_dir, chrom_sizes, chromlist,\
     chromlist : list of string
         the names of the chromosomes to consider. This list is ignored if subset is not null
     res : int
-        optional, the resolution to consider
+        optional, the resolution to consider (default 10000)
     subset : string
         optional, the path to the file containing the regions to subset, if any (default None)
     dist : int
@@ -93,11 +93,11 @@ def single_tree(tree_path, sample_file, output_dir, chrom_sizes, chromlist,\
     column : int
         optional, the column conting the score to consider. The first column is column 1. Ignored if the input files are .mcool files (default 4)
     transform : list of string
-        the transformation(s) to apply to the matrix. "OE". "log1p" and "Z-score" are supported. (default Z-score)
+        optional, the transformation(s) to apply to the matrix. "OE". "log1p" and "Z-score" are supported. (default Z-score)
     balance : boolean
-        should the balanced weights be used (default True)
+        optional, should the balanced weights be used (default True)
     n_jobs : int
-        for paralleliation of pixel computation, how many jobs should be run in parallel (default 4)
+        optional, for paralleliation of pixel computation, how many jobs should be run in parallel (default 4)
     Raises
     ------
     Exception if one sample is of type .mcool and not the others
@@ -264,6 +264,8 @@ def single_tree(tree_path, sample_file, output_dir, chrom_sizes, chromlist,\
                     zscores_df = pd.concat([zscores_df, z_df])
             # Save pseudo counts
             cooler.create_cooler(path+node+".cool", bins_df, pixel_df, ordered=True, dtypes = {"count": "float"})
+            # Save z-scores
+            cooler.create_cooler(path+node+".zscores.cool", bins_df, zscores_df, ordered=True, dtypes = {"count": "float"})
         else :
             data = to_scores(vector_dict[node], samples_to_consider, transform, means_dict, vars_dict)
             matrices_dict[node] = vector_dict[node]
@@ -313,3 +315,66 @@ def single_tree(tree_path, sample_file, output_dir, chrom_sizes, chromlist,\
     log.write("Edges' data saved. Time elapsed: %s seconds.\n" % (save_edges_done - save_nodes_done))
     log.close()
     # end
+
+
+def linkage_to_tree(linkage, leaves, outfile, exclude = []):
+    '''Convert linkage data to a tree file
+    
+    This function takes a linkage object, as produced by scipy, and converts it to a tree file, to be given as input to InfUSER.
+    
+    Parameters
+    ----------
+    linkage : ndarray
+        the hierarchical clustering encoded as a linkage matrix
+    leaves : list of string
+        the names of the leaves
+    outfile : string
+        the path where to save the tree file
+    exclude : list of string
+        optional, the names of the leaves to exclude. If the list is empty, no leaf is excluded (default [])
+    
+    '''
+    lines = []
+    aliases = {}
+    # Loop over linkage info
+    new_node = len(leaves)-1
+    for link in linkage:
+        #print(link)
+        new_node = new_node + 1
+        if link[0] < len(leaves):
+            if leaves[int(link[0])] in exclude:
+                if link[1] < len(leaves):
+                    aliases[new_node] = leaves[int(link[1])]
+                    continue
+                else:
+                    aliases[new_node] = str(int(link[1]))
+                    continue
+            else:
+                node1_name = leaves[int(link[0])]
+        elif int(link[0]) in aliases:
+            node1_name = aliases[int(link[0])]
+        else:
+            node1_name = str(int(link[0]))
+        #
+        if link[1] < len(leaves):
+            if leaves[int(link[1])] in exclude:
+                if link[0] < len(leaves):
+                    aliases[new_node] = leaves[int(link[0])]
+                    continue
+                else:
+                    aliases[new_node] = str(int(link[0]))
+                    continue
+            else:
+                node2_name = leaves[int(link[1])]
+        elif int(link[1]) in aliases:
+            node2_name = aliases[int(link[1])]
+        else:
+            node2_name = str(int(link[1]))
+        #
+        lines = lines + [node1_name+'\t'+str(new_node)+'\n', node2_name+'\t'+str(new_node)+'\n']
+    #
+    lines = lines + [str(new_node)+'\n']
+    # Write in file
+    with open(outfile, 'w') as f:
+        for l in lines[::-1]:
+            f.write(l)

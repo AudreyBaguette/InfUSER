@@ -44,40 +44,37 @@ Run InfUSER with a single data type.
     └── n2  
     &nbsp; &nbsp; &nbsp; &nbsp;├── l4  
     &nbsp; &nbsp; &nbsp; &nbsp;└── l5   
-    The file corresponding to the example file above is provided at `Examples/tree_file.tsv`.
+    The file corresponding to the example file above is provided at `Examples/tree_file.tsv`. A helper function is provided to change a linkage ndarray to the proper format. See section [linkage_to_tree](#linkage_to_tree) for more information.
 - Samples description file (API: sample_file, CLI: SAMPLEFILE)   
     The samples files contains two fileds, separated by tabs. The first field is the name of the sample. Samples names must be the same as the one in the topology file. The second field is the path to the corresponding data file (.mcool or .bed). All leaves (terminal nodes) present in the topology file must be present in the samples file with a valid path. If extra samples are present in the samples files and not in the topology, they will be ignored.
     - For Hi-C:   
     The samples file corresponding to tree topology file above is provided at `Examples/HiC_samples_file.tsv`.
     - For other data types:   
     The data files need to have the same number of rows, in the same order. The samples file corresponding to tree topology file above is provided at `Examples/ChIP_samples_file.tsv`.
-- Output directory (API: output_dir, CLI: OUTDIR)   
+- Output directory (API: output_dir, CLI: OUTDIR)
     The path to the output directory (see Outputs section for a description of the created files and the file structure)
-- File of chromosome sizes (API: chrom_sizes, CLI: CHROMSIZES)   
-    Optional, the path to the file containing the size (in bp) of each chromosome (default "data/hg38.chrom.sizes")
-- Chromosomes to process (API: chromlist, CLI: CHROMLIST)   
-    Optional, the names of the chromosomes to consider. This list is ignored if subset is not null. 
+- File of chromosome sizes (API: chrom_sizes, CLI: CHROMSIZES)
+    TThe path to the file containing the size (in bp) of each chromosome
+- Chromosomes to process (API: chromlist, CLI: CHROMLIST)
+    The names of the chromosomes to consider. This list is ignored if subset is not null. 
 
 #### Optional inputs
-- res/r/resolution : int   
+- Resolution (API: res, CLI: -r/--resolution)
     The resolution to consider. The input files need to have been generated with that resolution. (Hi-C only, default 10000)
-- Subset file (specified by subset)   
+- Subset file (API: subset, CLI: -s/--subset) 
     The subset file is only used when the input data is Hi-C. It must contain three columns, separated by tabs. The first column is the chromosome name. The second column is the start of the region to consider. The third column is the end of the region to consider. The file must contain a header, with the following names:   
 	seqnames	start	end   
 	Notes: the start and end coordinates are rounded down to the nearest bin, relative to the resolution. The end bin is excluded. If the start and end region fall within the exact same bin, the region is considered too small and is ignored. An example is provided at `Examples/subset_file.tsv`.
-- dist : int   
-    Optional, The distance to consider. All interactions beyond that distance will be ignored. If set to 0, all interactions are kept (Hi-C only, default 0)
-- n_values : int   
-    The number of values that need to be stored in the nodes. In other words, how many values should be considered to discretize the continuous data. (default 9)
-- min : float   
-    The minimal Z-score value to consider (default -4)
-- max : float   
-    The maximal Z-score value to consider (default 4)
-- column : int   
-    Optional, the column conting the score to consider. The first column is column 1 (1D data only, default 4)
-- transform   
-- balance   
-- n_jobs   
+- Maximal distance to consider (API: dist, CLI: -d/--dist)
+    The distance to consider. All interactions beyond that distance will be ignored. If set to 0, all interactions are kept (Hi-C only, default 0)
+- Column index (API: column, CLI: -c/--column)
+    The column conting the score to consider. The first column is column 1 (1D data only, default 4)
+- Transformation  (API: transform, CLI: -t/--transform)
+    The transformation(s) to apply to the matrix. "OE". "log1p" and "Z-score" are supported. (default Z-score)
+- Balancing  (API: balance, CLI: -b/--balance)
+    Should the balanced weights be used (for Hi-C data only) (default True)
+- Number of jobs for parallelization  (API: n_jobs, CLI: -nj/--njobs)
+    For paralleliation of pixel computation, how many jobs should be run in parallel (default 4) 
 
 #### Outputs
 The output folder will contain one file and three sub-folders:
@@ -106,11 +103,27 @@ The output folder will contain one file and three sub-folders:
 	- For other data types:   
 	Each sub-folder will contain one tsv file. The files do not contain a signal value, but differences in signal values.
 
+### linkage_to_tree
+This helper function helps convert a linkage object, as produced by scipy, to a file of the correct input format. This helper function is available in API only.
+
+#### Required inputs
+- linkage : ndarray
+    The hierarchical clustering encoded as a linkage matrix. The exact format expected is the one produced by [scipy.cluster.hierarchy.linkage](https://docs.scipy.org/doc/scipy/reference/generated/scipy.cluster.hierarchy.linkage.html)
+- leaves : list of string
+    The names of the leaves. The leaves are expected to be in the same order as in the lineage object (`leaves[0]` is the name of node 0, `leaves[1]` is the name of node 1, etc)
+- outfile : string
+    The path where to save the tree file
+
+#### Optional inputs
+- exclude : list of string
+    The names of the leaves to exclude. If the list is empty, no leaf is excluded (default [])
+
+#### Outputs
+The function saves the tree in the correct format to the path specified as parameter.
 
 ## Contributing
 ### Contributors
 - Audrey Baguette
-- Tunde Lapohos
 
 ## References
 

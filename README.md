@@ -59,25 +59,28 @@ Run InfUSER with a single data type.
     Optional, the names of the chromosomes to consider. This list is ignored if subset is not null. 
 
 #### Optional inputs
-- res/r/resolution : int   
+- Resolution (API: res, CLI: -r/--resolution)
     The resolution to consider. The input files need to have been generated with that resolution. (Hi-C only, default 10000)
-- Subset file (specified by subset)   
+- Subset file (API: subset, CLI: -s/--subset) 
     The subset file is only used when the input data is Hi-C. It must contain three columns, separated by tabs. The first column is the chromosome name. The second column is the start of the region to consider. The third column is the end of the region to consider. The file must contain a header, with the following names:   
 	seqnames	start	end   
 	Notes: the start and end coordinates are rounded down to the nearest bin, relative to the resolution. The end bin is excluded. If the start and end region fall within the exact same bin, the region is considered too small and is ignored. An example is provided at `Examples/subset_file.tsv`.
-- dist : int   
-    Optional, The distance to consider. All interactions beyond that distance will be ignored. If set to 0, all interactions are kept (Hi-C only, default 0)
-- n_values : int   
+- Maximal distance to consider (API: dist, CLI: -d/--dist)
+    The distance to consider. All interactions beyond that distance will be ignored. If set to 0, all interactions are kept (Hi-C only, default 0)
+- Number of values for discretization (API: n_values, CLI: -nv/--nvalues)
     The number of values that need to be stored in the nodes. In other words, how many values should be considered to discretize the continuous data. (default 9)
-- min : float   
+- Minimal value for discretization (API: min, CLI: --min)
     The minimal Z-score value to consider (default -4)
-- max : float   
+- Maximal value for discretization (API: max, CLI: --max)
     The maximal Z-score value to consider (default 4)
-- column : int   
-    Optional, the column conting the score to consider. The first column is column 1 (1D data only, default 4)
-- transform   
-- balance   
-- n_jobs   
+- Column index (API: column, CLI: -c/--column)
+    The column conting the score to consider. The first column is column 1 (1D data only, default 4)
+- Transformation  (API: transform, CLI: -t/--transform)
+    The transformation(s) to apply to the matrix. "OE". "log1p" and "Z-score" are supported. (default Z-score)
+- Balancing  (API: balance, CLI: -b/--balance)
+    Should the balanced weights be used (for Hi-C data only) (default True)
+- Number of jobs for parallelization  (API: n_jobs, CLI: -nj/--njobs)
+    For paralleliation of pixel computation, how many jobs should be run in parallel (default 4)
 
 #### Outputs
 The output folder will contain one file and three sub-folders:

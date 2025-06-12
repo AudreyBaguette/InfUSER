@@ -155,26 +155,26 @@ def single_tree(tree_path, sample_file, output_dir, chrom_sizes, chromlist,\
     chromlist : list of string
         the names of the chromosomes to consider. This list is ignored if subset is not null
     res : int
-        optional, the resolution to consider
+        optional, the resolution to consider (default 10000)
     subset : string
         optional, the path to the file containing the regions to subset, if any (default None)
     dist : int
         optional, the distance to consider. All interactions beyond that distance will be ignored. If set to 0, all interactions 
         are kept. (default 0)
     n_values : int
-        the number of values that can be stored in the nodes (default 9)
+        optional, the number of values that can be stored in the nodes (default 9)
     min : float
-        the minimal Z-score value to consider (default -4)
+        optional, the minimal Z-score value to consider (default -4)
     max : float
-        the maximal Z-score value to consider (default 4)
+        optional, the maximal Z-score value to consider (default 4)
     column : int
         optional, the column conting the score to consider. The first column is column 1. Ignored if the input files are .mcool files (default 4)
     transform : list of string
-        the transformation(s) to apply to the matrix. "OE". "log1p" and "Z-score" are supported. (default Z-score)
+        optional, the transformation(s) to apply to the matrix. "OE". "log1p" and "Z-score" are supported. (default Z-score)
     balance : boolean
-        should the balanced weights be used (default True)
+        optional, should the balanced weights be used (default True)
     n_jobs : int
-        for paralleliation of pixel computation, how many jobs should be run in parallel (default 4)
+        optional, for paralleliation of pixel computation, how many jobs should be run in parallel (default 4)
     Raises
     ------
     Exception if one sample is of type .mcool and not the others

@@ -82,7 +82,8 @@ def find_new_interval(curr_node_children):
     candidates = possible_values[np.where(scores == np.min(scores))[0]]
     # TODO remove when dev phase is over
     if len(candidates) > 2:
-        warnings.warn("More than 2 candidate values: " + candidates)
+        #warnings.warn("More than 2 candidate values: " + str(candidates))
+        warnings.warn("More than 2 candidate values: " + str(candidates) +' - possible_values: '+str(possible_values)+' - min:'+str(min(candidates))+' - max:'+str(max(candidates)))
     #
     return((min(candidates), max(candidates)))
 

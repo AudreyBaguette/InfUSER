@@ -148,6 +148,8 @@ def single_tree(tree_path, sample_file, output_dir, chrom_sizes, chromlist,\
                 if sample_is_cool:
                     num_HiC += 1
                     v, means, vars = HiC_matrix_to_vector(names[1], res, subset = subset, chromlist = chromlist, balance = balance, transformation = transform, dist = dist)
+                    if 'empty' in names[1]:
+                        v = np.array([np.nan]*len(v))
                 else:
                     num_other += 1
                     v, means, vars = get_1D_data(names[1], transformation = transform, col = column)
@@ -180,8 +182,6 @@ def single_tree(tree_path, sample_file, output_dir, chrom_sizes, chromlist,\
             vector_dict[node.tag] = np.zeros(n_pixels)
             
     # 3- Iterate across pixels and save the data sequentially
-    percent = np.round(n_pixels/100)
-
     # Convert the dictionary in an array fo easy parallelization
     matrix = np.array(list(vector_dict.values()))
     row_names = np.array(list(vector_dict.keys()))

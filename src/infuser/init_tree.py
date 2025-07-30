@@ -25,8 +25,8 @@ def init_tree(file_path):
     tree = Tree()
     # Read file and add the nodes consecutively. If one node should be added but its parent
     # does not exist, raise an Expection
+    f = open(file_path, "r")
     try:
-        f = open(file_path, "r")
         line = f.readline().strip('\n')
         tree.create_node(line, line)
         
@@ -35,7 +35,7 @@ def init_tree(file_path):
             line = line.strip('\n')
             names = line.split('\t')
             if not tree.contains(names[1]):
-                raise Exception("The tree file does not respect the expected format.")
+                raise Exception("The tree file does not respect the expected format. Node "+names[0]+' expects parent '+names[1]+' but it is not in the tree.')
             tree.create_node(names[0], names[0], parent = names[1])
             line = f.readline()
     finally:
@@ -65,7 +65,11 @@ def find_new_interval(curr_node_children):
     possible_values = []
     for child in curr_node_children:
         val1, val2 = child.data.get_interval()
-        possible_values = possible_values + [val1, val2]
+        # Verify that val1 and val2 are NOT nas
+        if val1 is not np.nan:
+            possible_values = possible_values + [val1]
+        if val2 is not np.nan:
+            possible_values = possible_values + [val2]
     #
     # For each possible value, compute the distance to each node and store the score in a new list
     scores = []
@@ -79,7 +83,7 @@ def find_new_interval(curr_node_children):
         scores = scores + [total_score]
     #
     # Find what values lead to the minimal score
-    candidates = possible_values[np.where(scores == np.min(scores))[0]]
+    candidates = possible_values[np.where(scores == np.nanmin(scores))[0]]
     # TODO remove when dev phase is over
     if len(candidates) > 2:
         #warnings.warn("More than 2 candidate values: " + str(candidates))

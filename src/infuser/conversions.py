@@ -43,8 +43,8 @@ def to_HiC_scores(input_matrix, chrom, samples, transformation, means_dict, vars
         vars_to_consider = vars_to_consider.reshape(len(samples), len(means_dict[samples[0]][chrom]))
         
         for diag in range(0, len(matrix)):
-            mean = np.mean(means_to_consider[:,diag])
-            var = np.mean(vars_to_consider[:,diag])
+            mean = np.nanmean(means_to_consider[:,diag])
+            var = np.nanmean(vars_to_consider[:,diag])
             matrix[kth_diag_indices(matrix, diag)] = matrix.diagonal(diag) * np.sqrt(var) + mean
             matrix[kth_diag_indices(matrix, -diag)] = matrix.diagonal(-diag) * np.sqrt(var) + mean
     
@@ -88,8 +88,8 @@ def to_scores(input_vector, samples, transformation, means_dict, vars_dict):
         #means_to_consider = means_to_consider.reshape(len(samples), len(means_dict[samples[0]]))
         #vars_to_consider = vars_to_consider.reshape(len(samples), len(means_dict[samples[0]]))
         
-        mean = np.mean(means_to_consider)
-        var = np.mean(vars_to_consider)
+        mean = np.nanmean(means_to_consider)
+        var = np.nanmean(vars_to_consider)
         vector = vector * np.sqrt(var) + mean
     
     return vector

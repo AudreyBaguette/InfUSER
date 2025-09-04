@@ -114,8 +114,8 @@ def z_transform(matrix):
     a numpy array that contains the variances of the diagonals
 
     '''
-    means = np.zeros(len(matrix))
-    vars = np.zeros(len(matrix))
+    means = np.array([np.nan]*len(matrix))#np.zeros(len(matrix))
+    vars = np.array([np.nan]*len(matrix))#np.zeros(len(matrix))
     for diag in range(0, len(matrix)):
         mean = np.mean([matrix.diagonal(diag), matrix.diagonal(-diag)])
         var = np.var([matrix.diagonal(diag), matrix.diagonal(-diag)])

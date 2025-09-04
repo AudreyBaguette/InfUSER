@@ -150,6 +150,9 @@ def single_tree(tree_path, sample_file, output_dir, chrom_sizes, chromlist,\
                     v, means, vars = HiC_matrix_to_vector(names[1], res, subset = subset, chromlist = chromlist, balance = balance, transformation = transform, dist = dist)
                     if 'empty' in names[1]:
                         v = np.array([np.nan]*len(v))
+                        for i in means:
+                        means[i] = np.array([np.nan]*len(means[i]))
+                        vars[i] = np.array([np.nan]*len(vars[i]))
                 else:
                     num_other += 1
                     v, means, vars = get_1D_data(names[1], transformation = transform, col = column)

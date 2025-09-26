@@ -21,7 +21,7 @@ def cli():
 
 @cli.command()
 def info():
-    print("InfUSER verison 1.1.0 (https://github.com/AudreyBaguette/InfUSER)")
+    print("InfUSER version 1.1.0 (https://github.com/AudreyBaguette/InfUSER)")
 
 @cli.command()
 @click.argument('treepath', nargs=1)

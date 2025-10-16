@@ -39,14 +39,16 @@ def to_HiC_scores(input_matrix, chrom, samples, transformation, means_dict, vars
             for sample in range(1, len(samples)):
                 means_to_consider = np.append(means_to_consider, means_dict[samples[sample]][chrom])
                 vars_to_consider = np.append(vars_to_consider, vars_dict[samples[sample]][chrom])
-        means_to_consider = means_to_consider.reshape(len(samples), len(means_dict[samples[0]][chrom]))
-        vars_to_consider = vars_to_consider.reshape(len(samples), len(means_dict[samples[0]][chrom]))
+            means_to_consider = means_to_consider.reshape(len(samples), len(means_dict[samples[0]][chrom]))
+            means_to_consider = np.nanmean(means_to_consider, axis = 0)
+            vars_to_consider = vars_to_consider.reshape(len(samples), len(means_dict[samples[0]][chrom]))
+            vars_to_consider = np.nanmean(vars_to_consider, axis = 0)
         
         for diag in range(0, len(matrix)):
-            mean = np.nanmean(means_to_consider[:,diag])
-            var = np.nanmean(vars_to_consider[:,diag])
-            matrix[kth_diag_indices(matrix, diag)] = matrix.diagonal(diag) * np.sqrt(var) + mean
-            matrix[kth_diag_indices(matrix, -diag)] = matrix.diagonal(-diag) * np.sqrt(var) + mean
+            mean = np.nanmean(means_to_consider[diag])
+            var = np.nanmean(vars_to_consider[diag])
+            matrix[kth_diag_indices(matrix, diag)] = input_matrix.diagonal(diag) * np.sqrt(var) + mean
+            #matrix[kth_diag_indices(matrix, -diag)] = matrix.diagonal(-diag) * np.sqrt(var) + mean
     
     return matrix
 

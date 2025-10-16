@@ -116,15 +116,16 @@ def z_transform(matrix):
     '''
     means = np.array([np.nan]*len(matrix))#np.zeros(len(matrix))
     vars = np.array([np.nan]*len(matrix))#np.zeros(len(matrix))
+    new_matrix = np.zeros(matrix.shape)
     for diag in range(0, len(matrix)):
-        mean = np.mean([matrix.diagonal(diag), matrix.diagonal(-diag)])
-        var = np.var([matrix.diagonal(diag), matrix.diagonal(-diag)])
-        matrix[kth_diag_indices(matrix, diag)] = (matrix.diagonal(diag) - mean) / np.sqrt(var)
-        matrix[kth_diag_indices(matrix, -diag)] = (matrix.diagonal(-diag) - mean) / np.sqrt(var)
+        mean = np.nanmean(matrix.diagonal(diag))#, matrix.diagonal(-diag)])
+        var = np.nanvar(matrix.diagonal(diag))#, matrix.diagonal(-diag)])
+        new_matrix[kth_diag_indices(new_matrix, diag)] = (matrix.diagonal(diag) - mean) / np.sqrt(var)
+        #matrix[kth_diag_indices(matrix, -diag)] = (matrix.diagonal(-diag) - mean) / np.sqrt(var)
         means[diag] = mean
         vars[diag] = var
     
-    return matrix, means, vars
+    return new_matrix, means, vars
 
 
 def HiC_matrix_to_vector_chrom(sample, res, chrom, subset = None, balance = True, transformation = ["Z-score"], dist = 0):

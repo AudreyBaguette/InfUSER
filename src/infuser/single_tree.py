@@ -379,7 +379,7 @@ def single_tree(tree_path, sample_file, output_dir, chrom_sizes, chromlist,\
             # Save pseudo counts
             cooler.create_cooler(path+node+".cool", bins_df, pixel_df, ordered=True, dtypes = {"count": "float"})
             # Save z-scores
-            cooler.create_cooler(path+node+".zscores.cool", bins_df, zscores_df, ordered=True, dtypes = {"count": "float"})
+            cooler.create_cooler(path+node+".transformed.cool", bins_df, zscores_df, ordered=True, dtypes = {"count": "float"})
         else :
             data = to_scores(vector_dict[node], samples_to_consider, transform, means_dict, vars_dict)
             matrices_dict[node] = vector_dict[node]

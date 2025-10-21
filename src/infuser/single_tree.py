@@ -216,6 +216,38 @@ def single_tree(tree_path, sample_file, output_dir, chrom_sizes, chromlist,\
     if os.path.exists(output_dir + "/tree_structure.txt"):
         os.remove(output_dir + "/tree_structure.txt")
     tree.save2file(output_dir + "/tree_structure.txt")
+
+    # Save the parsimony scores in matrix format
+    log = open(output_dir+"/log.txt", "a")
+    log.write("Saving parsimony scores per pixel...\n")
+    log.close()
+
+    if not os.path.isdir(output_dir+"/parsimony"): os.mkdir(output_dir+"/parsimony")
+    path = output_dir + "/parsimony/"
+    
+    if num_HiC > 0:
+        mat_dict = vector_to_matrix(parsimony_scores, res, subset, dist, chrom_sizes, chromlist)
+            
+        pixel_df = None
+        for chrom in mat_dict.keys():
+            mat = mat_dict[chrom]
+            names = range(id_dict[chrom], id_dict[chrom]+len(mat))
+            df = pd.DataFrame(mat,columns=names) # Pseudo counts
+            # Pseudo-counts
+            df['bin1_id'] = names
+            df = pd.melt(df,'bin1_id',var_name='bin2_id',value_name='count')
+            df = df[[not pd.isna(i) for i in df['count']]]
+            df = df.sort_values(by = ['bin1_id', 'bin2_id'])
+            df['bin2_id'] = df['bin2_id'].astype('int64')
+            if pixel_df is None:
+                pixel_df = df
+            else :
+                pixel_df = pd.concat([pixel_df, df])
+        # Save pseudo counts
+        cooler.create_cooler(path+"parsimony_scores.cool", bins_df, pixel_df, ordered=True, dtypes = {"count": "float"})
+    else :
+        data = parsimony_scores
+        np.savetxt(path+"parsimony_scores.tsv", data, delimiter="\t")
     
     # Save the data in matrix format
     if not os.path.isdir(output_dir+"/leaves"): os.mkdir(output_dir+"/leaves")

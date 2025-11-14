@@ -6,7 +6,9 @@ inputs of a single run to be of the same data type.
 ## Quick Start
 [TODO]
 ### CLI
+
 ### API
+
 
 ### Cloning the repository
 Use the following command to clone the repository: 
@@ -14,8 +16,23 @@ Use the following command to clone the repository:
     git clone https://github.com/AudreyBaguette/InfUSER.git
 
 ### Installing `InfUSER` and its dependencies
-[TODO]
+InfUSER v1.1.0 has been build in python 3.13. It relies on the following libraries:
+- numpy
+- pandas
+- treelib
+- joblib
+- cooler
+- cooltools
 
+Once those libraries have been installed, InfUSER can be installed from the cloned repo:
+```
+cd InfUSER
+pip install dist/infuser-1.1.0.tar.gz
+```
+or directly from GitHub:
+```
+pip install https://github.com/AudreyBaguette/InfUSER.git@v1.1.0
+```
 
 ## Usage
 ### info

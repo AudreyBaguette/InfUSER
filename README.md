@@ -4,10 +4,30 @@
 inputs of a single run to be of the same data type.
 
 ## Quick Start
-[TODO]
+This quickstart example uses the data and input files included in the `test` folder of the repository.
 ### CLI
+```
+infuser singletree -r 10000 -d 3000000 -nj 8 -b False\
+ tree_file.tsv\
+ samples_file.tsv\
+ 'output'\
+ mm10.chrom.sizes\
+ chr12
+```
 
 ### API
+```
+from infuser import single_tree
+single_tree(tree_path = 'tree_file.tsv',
+            sample_file = 'samples_file.tsv',
+            output_dir = 'output',
+            chrom_sizes = 'mm10.chrom.sizes',
+            chromlist = ['chr12'],
+            res = 10000,
+            dist = 3000000,
+            balance = False,
+            n_jobs = 8)
+```
 
 
 ### Cloning the repository
@@ -138,11 +158,12 @@ This helper function helps convert a linkage object, as produced by scipy, to a 
 #### Outputs
 The function saves the tree in the correct format to the path specified as parameter.
 
-## Contributing
-### Contributors
+## Contributors
 - Audrey Baguette
 
 ## References
+- Bonev B, Mendelson Cohen N, Szabo Q, Fritsch L et al. Multiscale 3D Genome Rewiring during Mouse Neural Development. Cell 2017 Oct 19;171(3):557-572.e24. PMID: 29053968
+- Zhang, Y., Blanchette, M. Reference panel guided topological structure annotation of Hi-C data. Nat Commun 13, 7426 (2022). https://doi.org/10.1038/s41467-022-35231-3
 
 ## Citing `InfUSER_single_tree`
 [TODO]

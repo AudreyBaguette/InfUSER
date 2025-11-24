@@ -8,6 +8,7 @@ This quickstart example uses the data and input files included in the `test` fol
 ### CLI
 ```
 infuser singletree -r 10000 -d 3000000 -nj 8 -b False\
+ -s chr12_subset.txt\
  tree_file.tsv\
  samples_file.tsv\
  'output'\
@@ -26,6 +27,7 @@ single_tree(tree_path = 'tree_file.tsv',
             res = 10000,
             dist = 3000000,
             balance = False,
+            subset = 'chr12_subset.txt',
             n_jobs = 8)
 ```
 
@@ -139,6 +141,10 @@ The output folder will contain one file and three sub-folders:
 	Each sub-folder will contain one file per chomosome and one .cool file merging them all. The files do not contain a contact frequency, but differences in contact frequencies.
 	- For other data types:   
 	Each sub-folder will contain one tsv file. The files do not contain a signal value, but differences in signal values.
+
+- parsimony
+    - parsimony_scores.cool
+    The final parsimony scores, for each pixel, saved as a matrix in the .cool format.
 
 ### linkage_to_tree
 This helper function helps convert a linkage object, as produced by scipy, to a file of the correct input format. This helper function is available in API only.

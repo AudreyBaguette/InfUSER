@@ -4,10 +4,10 @@
 inputs of a single run to be of the same data type.
 
 ## Quick Start
-This quickstart example uses the data and input files included in the `test` folder of the repository.
+This quickstart example uses the data and input files included in the `test` folder of the repository. The following takes around 54 seconds to be executed.
 ### CLI
 ```
-infuser singletree -r 10000 -d 3000000 -nj 8 -b False\
+infuser singletree -r 100000 -d 1000000 -nj 2 -b False\
  -s chr12_subset.txt\
  tree_file.tsv\
  samples_file.tsv\
@@ -24,11 +24,11 @@ single_tree(tree_path = 'tree_file.tsv',
             output_dir = 'output',
             chrom_sizes = 'mm10.chrom.sizes',
             chromlist = ['chr12'],
-            res = 10000,
-            dist = 3000000,
+            res = 100000,
+            dist = 1000000,
             balance = False,
             subset = 'chr12_subset.txt',
-            n_jobs = 8)
+            n_jobs = 2)
 ```
 
 
@@ -163,6 +163,10 @@ This helper function helps convert a linkage object, as produced by scipy, to a 
 
 #### Outputs
 The function saves the tree in the correct format to the path specified as parameter.
+
+### Runtime
+The following figure represents the necessary runtime across mouse autosomes at different resultions. InfUSER was running on 8 nodes, using 150Gb of RAM each (note that the runs at lower resolutions required less resources). For the 5kb, 10kb and 50kb resolutions, a maximal distance of 3Mb was used. The runs at 100kb, 500kb and 1Mb did not have a maximal distance requested.
+[InfUSER runtime](processing_time_InfUSER.pdf)
 
 ## Contributors
 - Audrey Baguette

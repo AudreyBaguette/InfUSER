@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import cooler
 import math
-from cooltools.lib import numutils
+# from cooltools.lib import numutils
 
 
 def kth_diag_indices(a, k):
@@ -154,7 +154,7 @@ def HiC_matrix_to_vector_chrom(sample, res, chrom, subset = None, balance = True
     balance : boolean
         optional, should the balanced matrix be used instead of the raw counts? (default True)
     transformation : list of string
-        the transformation(s) to apply to the matrix. "OE". "log1p" and "Z-score" are supported. (default Z-score)
+        the transformation(s) to apply to the matrix. "log1p" and "Z-score" are supported. (default Z-score)
     dist : int
         the distance to consider. All interactions beyond that distance will be ignored. If set to 0, all interactions 
         are kept. (default 0)
@@ -187,12 +187,13 @@ def HiC_matrix_to_vector_chrom(sample, res, chrom, subset = None, balance = True
     
     means = None
     vars = None
-    if "OE" in transformation:
-        # get O/E matrix
-        mask = A.sum(axis=0) > 0
-        OE, _, _, _ = numutils.observed_over_expected(A, mask)
-        OE = np.clip(OE, 0, np.percentile(OE[mask, :][:, mask], 99.9))
-        A = OE
+    # Note: cooltools can be a pain to install and is not super useful, so it's easier to remove the OE normalization for now
+    # if "OE" in transformation:
+    #     # get O/E matrix
+    #     mask = A.sum(axis=0) > 0
+    #     OE, _, _, _ = numutils.observed_over_expected(A, mask)
+    #     OE = np.clip(OE, 0, np.percentile(OE[mask, :][:, mask], 99.9))
+    #     A = OE
         
     if "log1p" in transformation:
         A = np.log1p(A)
@@ -258,7 +259,7 @@ def HiC_matrix_to_vector(sample, res, subset = None, balance = True, transformat
     balance : boolean
         optional, should the balanced matrix be used instead of the raw counts? (default True)
     transformation : list of string
-        the transformation(s) to apply to the matrix. "OE". "log1p" and "Z-score" are supported. (default Z-score)
+        the transformation(s) to apply to the matrix. "log1p" and "Z-score" are supported. (default Z-score)
     dist : int
         the distance to consider. All interactions beyond that distance will be ignored. If set to 0, all interactions 
         are kept. (default 0)
@@ -270,7 +271,7 @@ def HiC_matrix_to_vector(sample, res, subset = None, balance = True, transformat
     -------
     a numpy array that is the vectorized (subset of the) matrix
     a dictionary that contains one vector of means of the diagonals per chromosome (None if not z-transformed)
-    a dictionary that contains oen vector of variances of the diagonals per chromosome  (None if not z-transformed)
+    a dictionary that contains one vector of variances of the diagonals per chromosome  (None if not z-transformed)
     
     Raises
     ------
@@ -313,7 +314,7 @@ def get_1D_data(sample, transformation = ["Z-score"], col = 4):
     sample : string
         the path to the file
     transformation : list of string
-        the transformation(s) to apply to the matrix. "OE". "log1p" and "Z-score" are supported. (default Z-score)
+        the transformation(s) to apply to the matrix. "log1p" and "Z-score" are supported. (default Z-score)
     col : int
         optional, the column conting the score to consider. The first column is column 1. (default 4)
     

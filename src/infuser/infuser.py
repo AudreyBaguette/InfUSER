@@ -33,7 +33,7 @@ def info():
 @click.option('-s', '--subset', type=str, help='the path to the file containing the regions to subset, if any', default='')
 @click.option('-d', '--dist', type=int, help='the distance to consider. All interactions beyond that distance will be ignored. If set to 0, all interactions are kept', default=0)
 @click.option('-c', '--column', type=int, help='the column conting the score to consider. The first column is column 1. Ignored if the input files are .mcool files', default=4)
-@click.option('-t', '--transform', type=list, help='the transformation(s) to apply to the matrix. "OE". "log1p" and "Z-score" are supported.', default=['Z-score'])
+@click.option('-t', '--transform', type=list, help='the transformation(s) to apply to the matrix. "log1p" and "Z-score" are supported.', default=['Z-score'])
 @click.option('-b', '--balance', type=bool, help='should the balanced weights be used', default=True)
 @click.option('-nj', '--njobs', type=int, help='paralleliation of pixel computation, how many jobs should be run in parallel', default=4)
 def singletree(treepath, samplefile, outdir, chromsizes, chromlist, resolution, subset, dist, \

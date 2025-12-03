@@ -93,7 +93,7 @@ def single_tree(tree_path, sample_file, output_dir, chrom_sizes, chromlist,\
     column : int
         optional, the column conting the score to consider. The first column is column 1. Ignored if the input files are .mcool files (default 4)
     transform : list of string
-        optional, the transformation(s) to apply to the matrix. "OE". "log1p" and "Z-score" are supported. (default Z-score)
+        optional, the transformation(s) to apply to the matrix. "log1p" and "Z-score" are supported. (default Z-score)
     balance : boolean
         optional, should the balanced weights be used (default True)
     n_jobs : int

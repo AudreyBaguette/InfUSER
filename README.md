@@ -44,7 +44,6 @@ InfUSER v1.1.0 has been build in python 3.13. It relies on the following librari
 - treelib
 - joblib
 - cooler
-- cooltools
 
 Once those libraries have been installed, InfUSER can be installed from the cloned repo:
 ```
@@ -109,7 +108,7 @@ Run InfUSER with a single data type.
 - Column index (API: column, CLI: -c/--column)
     The column conting the score to consider. The first column is column 1 (1D data only, default 4)
 - Transformation  (API: transform, CLI: -t/--transform)
-    The transformation(s) to apply to the matrix. "OE". "log1p" and "Z-score" are supported. (default Z-score)
+    The transformation(s) to apply to the matrix. "log1p" and "Z-score" are supported. (default Z-score)
 - Balancing  (API: balance, CLI: -b/--balance)
     Should the balanced weights be used (for Hi-C data only) (default True)
 - Number of jobs for parallelization  (API: n_jobs, CLI: -nj/--njobs)

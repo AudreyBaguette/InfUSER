@@ -8,7 +8,9 @@ import os
 import numpy as np
 import time
 from joblib import Parallel, delayed
-#import pandas as pd
+import warnings
+
+warnings.filterwarnings("ignore")
 
 def prepare_bins(chrom_sizes, res, subset = None, chromlist = []):
     '''Prepare the bins to store Hi-C data

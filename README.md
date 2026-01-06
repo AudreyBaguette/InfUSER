@@ -48,6 +48,7 @@ InfUSER v1.1.0 has been build in python 3.13. It relies on the following librari
 Once those libraries have been installed, InfUSER can be installed from the cloned repo:
 ```
 cd InfUSER
+git checkout v1.1.0
 pip install dist/infuser-1.1.0.tar.gz
 ```
 or directly from GitHub:

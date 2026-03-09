@@ -4,9 +4,33 @@
 inputs of a single run to be of the same data type.
 
 ## Quick Start
-[TODO]
+This quickstart example uses the data and input files included in the `test` folder of the repository. The following takes around 54 seconds to be executed.
 ### CLI
+```
+infuser singletree -r 100000 -d 1000000 -nj 2 -b False\
+ -s chr12_subset.txt\
+ tree_file.tsv\
+ samples_file.tsv\
+ 'output'\
+ mm10.chrom.sizes\
+ chr12
+```
+
 ### API
+```
+from infuser import single_tree
+single_tree(tree_path = 'tree_file.tsv',
+            sample_file = 'samples_file.tsv',
+            output_dir = 'output',
+            chrom_sizes = 'mm10.chrom.sizes',
+            chromlist = ['chr12'],
+            res = 100000,
+            dist = 1000000,
+            balance = False,
+            subset = 'chr12_subset.txt',
+            n_jobs = 2)
+```
+
 
 ### Cloning the repository
 Use the following command to clone the repository: 
@@ -14,8 +38,23 @@ Use the following command to clone the repository:
     git clone https://github.com/AudreyBaguette/InfUSER.git
 
 ### Installing `InfUSER` and its dependencies
-[TODO]
+InfUSER v1.1.0 has been build in python 3.13. It relies on the following libraries:
+- numpy
+- pandas
+- treelib
+- joblib
+- cooler
 
+Once those libraries have been installed, InfUSER can be installed from the cloned repo:
+```
+cd InfUSER
+git checkout v1.1.0
+pip install dist/infuser-1.1.0.tar.gz
+```
+or directly from GitHub:
+```
+pip install https://github.com/AudreyBaguette/InfUSER.git@v1.1.0
+```
 
 ## Usage
 ### info
@@ -44,19 +83,19 @@ Run InfUSER with a single data type.
     └── n2  
     &nbsp; &nbsp; &nbsp; &nbsp;├── l4  
     &nbsp; &nbsp; &nbsp; &nbsp;└── l5   
-    The file corresponding to the example file above is provided at `Examples/tree_file.tsv`.
+    The file corresponding to the example file above is provided at `Examples/tree_file.tsv`. A helper function is provided to change a linkage ndarray to the proper format. See section [linkage_to_tree](#linkage_to_tree) for more information.
 - Samples description file (API: sample_file, CLI: SAMPLEFILE)   
     The samples files contains two fileds, separated by tabs. The first field is the name of the sample. Samples names must be the same as the one in the topology file. The second field is the path to the corresponding data file (.mcool or .bed). All leaves (terminal nodes) present in the topology file must be present in the samples file with a valid path. If extra samples are present in the samples files and not in the topology, they will be ignored.
     - For Hi-C:   
     The samples file corresponding to tree topology file above is provided at `Examples/HiC_samples_file.tsv`.
     - For other data types:   
     The data files need to have the same number of rows, in the same order. The samples file corresponding to tree topology file above is provided at `Examples/ChIP_samples_file.tsv`.
-- Output directory (API: output_dir, CLI: OUTDIR)   
+- Output directory (API: output_dir, CLI: OUTDIR)
     The path to the output directory (see Outputs section for a description of the created files and the file structure)
-- File of chromosome sizes (API: chrom_sizes, CLI: CHROMSIZES)   
-    Optional, the path to the file containing the size (in bp) of each chromosome (default "data/hg38.chrom.sizes")
-- Chromosomes to process (API: chromlist, CLI: CHROMLIST)   
-    Optional, the names of the chromosomes to consider. This list is ignored if subset is not null. 
+- File of chromosome sizes (API: chrom_sizes, CLI: CHROMSIZES)
+    TThe path to the file containing the size (in bp) of each chromosome
+- Chromosomes to process (API: chromlist, CLI: CHROMLIST)
+    The names of the chromosomes to consider. This list is ignored if subset is not null. 
 
 #### Optional inputs
 - Resolution (API: res, CLI: -r/--resolution)
@@ -67,20 +106,14 @@ Run InfUSER with a single data type.
 	Notes: the start and end coordinates are rounded down to the nearest bin, relative to the resolution. The end bin is excluded. If the start and end region fall within the exact same bin, the region is considered too small and is ignored. An example is provided at `Examples/subset_file.tsv`.
 - Maximal distance to consider (API: dist, CLI: -d/--dist)
     The distance to consider. All interactions beyond that distance will be ignored. If set to 0, all interactions are kept (Hi-C only, default 0)
-- Number of values for discretization (API: n_values, CLI: -nv/--nvalues)
-    The number of values that need to be stored in the nodes. In other words, how many values should be considered to discretize the continuous data. (default 9)
-- Minimal value for discretization (API: min, CLI: --min)
-    The minimal Z-score value to consider (default -4)
-- Maximal value for discretization (API: max, CLI: --max)
-    The maximal Z-score value to consider (default 4)
 - Column index (API: column, CLI: -c/--column)
     The column conting the score to consider. The first column is column 1 (1D data only, default 4)
 - Transformation  (API: transform, CLI: -t/--transform)
-    The transformation(s) to apply to the matrix. "OE". "log1p" and "Z-score" are supported. (default Z-score)
+    The transformation(s) to apply to the matrix. "log1p" and "Z-score" are supported. (default Z-score)
 - Balancing  (API: balance, CLI: -b/--balance)
     Should the balanced weights be used (for Hi-C data only) (default True)
 - Number of jobs for parallelization  (API: n_jobs, CLI: -nj/--njobs)
-    For paralleliation of pixel computation, how many jobs should be run in parallel (default 4)
+    For paralleliation of pixel computation, how many jobs should be run in parallel (default 4) 
 
 #### Outputs
 The output folder will contain one file and three sub-folders:
@@ -109,13 +142,38 @@ The output folder will contain one file and three sub-folders:
 	- For other data types:   
 	Each sub-folder will contain one tsv file. The files do not contain a signal value, but differences in signal values.
 
+- parsimony
+    - parsimony_scores.cool
+    The final parsimony scores, for each pixel, saved as a matrix in the .cool format.
 
-## Contributing
-### Contributors
+### linkage_to_tree
+This helper function helps convert a linkage object, as produced by scipy, to a file of the correct input format. This helper function is available in API only.
+
+#### Required inputs
+- linkage : ndarray
+    The hierarchical clustering encoded as a linkage matrix. The exact format expected is the one produced by [scipy.cluster.hierarchy.linkage](https://docs.scipy.org/doc/scipy/reference/generated/scipy.cluster.hierarchy.linkage.html)
+- leaves : list of string
+    The names of the leaves. The leaves are expected to be in the same order as in the lineage object (`leaves[0]` is the name of node 0, `leaves[1]` is the name of node 1, etc)
+- outfile : string
+    The path where to save the tree file
+
+#### Optional inputs
+- exclude : list of string
+    The names of the leaves to exclude. If the list is empty, no leaf is excluded (default [])
+
+#### Outputs
+The function saves the tree in the correct format to the path specified as parameter.
+
+### Runtime
+The following figure represents the necessary runtime across mouse autosomes at different resultions. InfUSER was running on 8 nodes, using 150Gb of RAM each (note that the runs at lower resolutions required less resources). For the 5kb, 10kb and 50kb resolutions, a maximal distance of 3Mb was used. The runs at 100kb, 500kb and 1Mb did not have a maximal distance requested.
+[InfUSER runtime](processing_time_InfUSER.pdf)
+
+## Contributors
 - Audrey Baguette
-- Tunde Lapohos
 
 ## References
+- Bonev B, Mendelson Cohen N, Szabo Q, Fritsch L et al. Multiscale 3D Genome Rewiring during Mouse Neural Development. Cell 2017 Oct 19;171(3):557-572.e24. PMID: 29053968
+- Zhang, Y., Blanchette, M. Reference panel guided topological structure annotation of Hi-C data. Nat Commun 13, 7426 (2022). https://doi.org/10.1038/s41467-022-35231-3
 
 ## Citing `InfUSER_single_tree`
 [TODO]

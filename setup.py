@@ -36,7 +36,7 @@ setup(
     # For a discussion on single-sourcing the version across setup.py and the
     # project code, see
     # https://packaging.python.org/guides/single-sourcing-package-version/
-    version="1.0.0",  # Required
+    version="1.1.0",  # Required
     # This is a one-line description or tagline of what your project does. This
     # corresponds to the "Summary" metadata field:
     # https://packaging.python.org/specifications/core-metadata/#summary
@@ -122,7 +122,7 @@ setup(
     #
     # For an analysis of "install_requires" vs pip's requirements files see:
     # https://packaging.python.org/discussions/install-requires-vs-requirements/
-    install_requires=["treelib", "numpy", "joblib", "cooler", "cooltools", 'pandas', "scikit-image"],  # Optional
+    install_requires=["treelib", "numpy", "joblib", "cooler", 'pandas'],
     # Entry points. The following would provide a command called `sample` which
     # executes the function `main` from this package when invoked:
     entry_points={  # Optional

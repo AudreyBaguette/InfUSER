@@ -8,136 +8,74 @@ class Pixel(object):
 
     Attributes
     ----------
-    n_values : int
-        the number of possible values that each pixel can take (default 9).
-        the values will range from 0 to n_values-1.
+    values_interval : tuple of floats
+        the interval of possible value that the pixel can take.
     n_children : int
         the number of children of the nodes.
-    scores_matrix : numpy array of floats
-        an array storing the score of each possible value. It has n_values x 1 dimensions.
-    origins_matrix : numpy array of integers
-        an array storing the value of the children producing the scores in scores_matrix. It has n_values x n_children dimensions.
     
     """
-    def __init__(self, n_children, n_values = 9):
+    def __init__(self, n_children):
         """
         Parameters
         ----------
         n_children : int
             The number of children of the node
-        n_values : int
-            The number of possible values the pixel can take (default is 9)
         
-        The constructor fills scores_matrix with np.inf and origins_matrix with np.nan.
-        If the node does not have children, the matrix is null
+        The constructor fills the value_interval with a tuple of np.nan.
         """
         self.n_children = n_children
-        self.n_values = n_values
-        self.scores_matrix = np.full((n_values, 1), np.inf)
-        if n_children > 0:
-            self.origins_matrix = np.full((n_values, n_children), np.nan)
-        else :
-            self.origins_matrix = None
+        self.values_interval = (np.nan, np.nan)
 
-    def set_score(self, value, score):
+
+    def set_interval(self, val1, val2):
         """Updates the scores_matrix
 
         The matrix is updated such that the line corresponding to the value contain the score.
 
         Parameters
         ----------
-        value : int
-            The value for which the score and origins should be updated.
-        score : float
-            The new score to input in scores_matrix.
+        val1 : float
+            The first end of the interval.
+        val2 : float
+            The second end of the interval.
 
-        Raises
-        ------
-        ValueError
-            If value is not between 0 and self.n_values.
         """
 
-        if value >= 0 and value < self.n_values:
-            self.scores_matrix[value] = score
+        if val1 > val2:
+            self.values_interval = (val2, val1)
         else:
-            raise ValueError("The value parameter is not within expected values")
-
-
-    def set_score_and_origins(self, value, score, origins):
-        """Updates the scores_matrix and origins_matrix
-
-        The matrices are updated such that the line corresponding to the value contain the score and origins.
-
-        Parameters
-        ----------
-        value : int
-            The value for which the score and origins should be updated.
-        score : float
-            The new score to input in scores_matrix.
-        origins : list of int
-            The values from which the score was computed.
-
-        Raises
-        ------
-        ValueError
-            If value is not between 0 and self.n_values.
-        """
-
-        assert np.all([isinstance(i, int) for i in origins])
-        if value >= 0 and value < self.n_values:
-            self.scores_matrix[value] = score
-            self.origins_matrix[value] = origins
-        else:
-            raise ValueError("The value parameter is not within expected values")
-        
-
-    def get_min_value(self):
-        """Returns the value of resulting in the minimal score
-
-        Returns
-        ------
-        int, the value corresponding to the minimal score stored in scores_matrix
-        float, the score of that value
-        """
-
-        min = np.where(self.scores_matrix == np.min(self.scores_matrix))[0]
-        # If there are more than one min, select one randomly
-        if len(min) > 1:
-            select = np.random.randint(len(min))
-            min_value = min[select]
-        else:
-            min_value = min[0]
-        return(min_value, np.min(self.scores_matrix))
+            self.values_interval = (val1, val2)
 
         
-    def get_min_origins(self, value):
-        """Returns the value of the children resulting in the value passed as parameter.
+    def get_interval(self):
+        """Returns the interval of values.
 
-        Parameters
-        ----------
-        value : int
-            The value for which the origins' values are retrieved.
-        
         Returns
         ------
         numpy array of int, the values corresponding to the origins giving the minimal score stored in scores_matrix
         
-        Raises
-        ------
-        ValueError
-            If value is not between 0 and self.n_values.
         """
-        if value >= 0 and value < self.n_values:
-            min_origin = self.origins_matrix[value]
-            return(min_origin.astype(int))
-        else:
-            raise ValueError("The value parameter is not within expected values")
+        return(self.values_interval)
         
 
+    def compute_distance(self, value):
+        """Compute the difference between a given value and the interval stored in the Pixel instance.
+
+        Parameters
+        ----------
+        value : float
+            The value to compare to the interval.
+
+        Returns
+        ------
+        float, the distance (euclidian) between the interval and the value
+        float, the value leading to that minimal distance
         
-    def reset_scores(self):
         """
-        Erase the data within scores_matrix and reset the values.
-        """
-        self.scores_matrix = np.full((self.n_values, 1), np.inf)
+        if value < self.values_interval[0]:
+            return (self.values_interval[0] - value, self.values_interval[0])
+        elif value > self.values_interval[1]:
+            return (value - self.values_interval[1], self.values_interval[1])
+        else:
+            return (0, value)
 
